@@ -43,23 +43,14 @@ public class CharacterMovement : MonoBehaviour
             rb.AddForce(desiredVelocity - rb.velocity, ForceMode.VelocityChange);
         }
 
-        // Rotate the player based on the mouse position
-        Vector3 mousePosition = Input.mousePosition;
-        mousePosition.z = 10f; // Set the z-distance from the camera
-        Vector3 lookDirection = Camera.main.ScreenToWorldPoint(mousePosition) - transform.position;
-        lookDirection.y = 0f; // Ignore the y-axis (up/down)
+        // Rotate the player based on the mouse movement
+        float mouseX = Input.GetAxis("Mouse X");
+        float rotationAmount = mouseX * rotationSpeed * Time.deltaTime;
 
-        // Check if the mouse position has changed
-        if (mousePosition != previousMousePosition)
-        {
-            // Calculate the rotation amount based on the look direction and rotation speed
-            Quaternion targetRotation = Quaternion.LookRotation(lookDirection, Vector3.up);
-            float step = rotationSpeed * Time.deltaTime;
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, step);
-        }
+        // Rotate the player
+        transform.Rotate(0f, rotationAmount, 0f);
 
-        // Update the previous mouse position
-        previousMousePosition = mousePosition;
+    
 
         // Set the isWalking boolean in the animator
         animator.SetBool("isWalking", isMoving);
