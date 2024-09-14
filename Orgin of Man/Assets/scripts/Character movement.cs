@@ -25,6 +25,9 @@ public class CharacterMovement : MonoBehaviour
         float moveHorizontal = Input.GetAxis("Horizontal");
         float moveVertical = Input.GetAxis("Vertical");
 
+        bool isLeft = moveHorizontal < 0 && moveVertical == 0;
+        bool isRight = moveHorizontal > 0 && moveVertical == 0;
+
         // Calculate the movement vector in local space (relative to the player's rotation)
         Vector3 localMovement = new Vector3(moveHorizontal, 0.0f, moveVertical);
 
@@ -35,7 +38,7 @@ public class CharacterMovement : MonoBehaviour
         bool isMoving = movement.sqrMagnitude > 0.01f; // Adjust the threshold value as needed
 
         // Check if the player is sprinting (left shift key is pressed)
-        bool isSprinting = isMoving && Input.GetKey(KeyCode.LeftShift);
+        bool isSprinting = isMoving && Input.GetKey(KeyCode.LeftShift) && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S));
 
         if (isMoving)
         {
@@ -49,7 +52,9 @@ public class CharacterMovement : MonoBehaviour
             // Apply the force to reach the desired velocity
             rb.AddForce(desiredVelocity - rb.velocity, ForceMode.VelocityChange);
 
-           
+    
+
+
         }
 
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
@@ -77,5 +82,7 @@ public class CharacterMovement : MonoBehaviour
         // Set the isWalking boolean in the animator
         animator.SetBool("isWalking", isMoving);
         animator.SetBool("isSprinting", isSprinting);
+        animator.SetBool("isLeft", isLeft);
+        animator.SetBool("isRight", isRight);
     }
 }
