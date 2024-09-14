@@ -7,9 +7,12 @@ public class CharacterMovement : MonoBehaviour
     public float movementSpeed = 10.0f; // Set this in the Inspector
     public float maxSpeed = 5.0f; // Set the maximum speed limit
     public float rotationSpeed = 5.0f; // Set the rotation speed
+    public float nonSprintSpeed = 1;
+    public float SprintSpeed = 5;
     private Rigidbody rb;
     private Animator animator; // Add a reference to the Animator component
     private Vector3 previousMousePosition;
+    private float rotationAmount;
 
     void Start()
     {
@@ -31,21 +34,40 @@ public class CharacterMovement : MonoBehaviour
         // Check if the player is moving
         bool isMoving = movement.sqrMagnitude > 0.01f; // Adjust the threshold value as needed
 
+        // Check if the player is sprinting (left shift key is pressed)
+        bool isSprinting = isMoving && Input.GetKey(KeyCode.LeftShift);
+
         if (isMoving)
         {
             // Calculate the desired velocity
-            Vector3 desiredVelocity = movement * movementSpeed;
+            float speedMultiplier = isSprinting ? SprintSpeed : nonSprintSpeed; // adjust the sprint speed multiplier as needed
+            Vector3 desiredVelocity = movement * movementSpeed * speedMultiplier;
 
             // Limit the velocity to the maximum speed
-            desiredVelocity = Vector3.ClampMagnitude(desiredVelocity, maxSpeed);
+            desiredVelocity = Vector3.ClampMagnitude(desiredVelocity, maxSpeed * speedMultiplier);
 
             // Apply the force to reach the desired velocity
             rb.AddForce(desiredVelocity - rb.velocity, ForceMode.VelocityChange);
+
+           
         }
+
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
+        {
+            // If the player is pressing A or D, rotate instead of moving horizontally
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            {
+                rotationAmount = moveHorizontal * rotationSpeed * Time.deltaTime;
+                transform.Rotate(0f, rotationAmount, 0f);
+                moveHorizontal = 0f; // reset horizontal input to prevent movement
+            }
+        }
+
+
 
         // Rotate the player based on the mouse movement
         float mouseX = Input.GetAxis("Mouse X");
-        float rotationAmount = mouseX * rotationSpeed * Time.deltaTime;
+        rotationAmount = mouseX * rotationSpeed * Time.deltaTime;
 
         // Rotate the player
         transform.Rotate(0f, rotationAmount, 0f);
@@ -54,5 +76,6 @@ public class CharacterMovement : MonoBehaviour
 
         // Set the isWalking boolean in the animator
         animator.SetBool("isWalking", isMoving);
+        animator.SetBool("isSprinting", isSprinting);
     }
 }
