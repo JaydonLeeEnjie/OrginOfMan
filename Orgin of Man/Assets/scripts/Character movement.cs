@@ -13,13 +13,23 @@ public class CharacterMovement : MonoBehaviour
     private Animator animator; // Add a reference to the Animator component
     private Vector3 previousMousePosition;
     private float rotationAmount;
+    private bool isGrounded;
+    public float jumpForce = 10f;
+
+    public Vector3 raycastOffset;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>(); // Get the Animator component
     }
-
+    void Update()
+    {
+        if (isGrounded && Input.GetKeyDown(KeyCode.Space))
+        {
+            Jump();
+        }
+    }
     void FixedUpdate()
     {
         float moveHorizontal = Input.GetAxis("Horizontal");
@@ -77,12 +87,39 @@ public class CharacterMovement : MonoBehaviour
         // Rotate the player
         transform.Rotate(0f, rotationAmount, 0f);
 
-    
+       
 
+        isGrounded = IsTouchingLayer("Ground");
+
+     
+        Debug.Log(isGrounded);
         // Set the isWalking boolean in the animator
         animator.SetBool("isWalking", isMoving);
         animator.SetBool("isSprinting", isSprinting);
         animator.SetBool("isLeft", isLeft);
         animator.SetBool("isRight", isRight);
+        animator.SetBool("isGrounded", isGrounded);
+    }
+
+    bool IsTouchingLayer(string layerName)
+    {
+
+        bool isTouching = Physics.Raycast(transform.position + raycastOffset, Vector3.down, 1.3f, LayerMask.GetMask(layerName));
+        Debug.DrawRay(transform.position + raycastOffset, Vector3.down * 1.3f, isTouching ? Color.green : Color.red);
+        return isTouching;
+    }
+
+    void Jump()
+    {
+        float moveHorizontal = Input.GetAxis("Horizontal");
+        float moveVertical = Input.GetAxis("Vertical");
+        if (moveHorizontal != 0 || moveVertical != 0)
+        {
+            rb.AddForce(Vector3.up * jumpForce * 10, ForceMode.Impulse);
+        }
+        else
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
     }
 }
